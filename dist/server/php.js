@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.retrievePhpIniSettings = exports.retrieveNativePHPConfig = exports.getAppPath = exports.serveApp = exports.startScheduler = exports.startQueueWorker = void 0;
+exports.getDefaultEnvironmentVariables = exports.retrievePhpIniSettings = exports.retrieveNativePHPConfig = exports.getAppPath = exports.startAppServer = void 0;
 const fs_1 = require("fs");
 const fs_extra_1 = require("fs-extra");
 const electron_store_1 = __importDefault(require("electron-store"));
@@ -109,32 +109,6 @@ function ensureAppFoldersAreAvailable() {
         (0, fs_1.writeFileSync)(databaseFile, '');
     }
 }
-function startQueueWorker(secret, apiPort, phpIniSettings = {}) {
-    const env = {
-        APP_ENV: process.env.NODE_ENV === 'development' ? 'local' : 'production',
-        APP_DEBUG: process.env.NODE_ENV === 'development' ? 'true' : 'false',
-        NATIVEPHP_STORAGE_PATH: storagePath,
-        NATIVEPHP_DATABASE_PATH: databaseFile,
-        NATIVEPHP_API_URL: `http://localhost:${apiPort}/api/`,
-        NATIVEPHP_RUNNING: true,
-        NATIVEPHP_SECRET: secret
-    };
-    const phpOptions = {
-        cwd: appPath,
-        env
-    };
-    return callPhp(['artisan', 'queue:work'], phpOptions, phpIniSettings);
-}
-exports.startQueueWorker = startQueueWorker;
-function startScheduler(secret, apiPort, phpIniSettings = {}) {
-    const env = getDefaultEnvironmentVariables(secret, apiPort);
-    const phpOptions = {
-        cwd: appPath,
-        env
-    };
-    return callPhp(['artisan', 'schedule:run'], phpOptions, phpIniSettings);
-}
-exports.startScheduler = startScheduler;
 function getPath(name) {
     try {
         return electron_1.app.getPath(name);
@@ -150,6 +124,7 @@ function getDefaultEnvironmentVariables(secret, apiPort) {
         NATIVEPHP_STORAGE_PATH: storagePath,
         NATIVEPHP_DATABASE_PATH: databaseFile,
         NATIVEPHP_API_URL: `http://localhost:${apiPort}/api/`,
+        NATIVEPHP_APP_URL: `http://localhost:${state_1.default.phpPort}/`,
         NATIVEPHP_RUNNING: true,
         NATIVEPHP_SECRET: secret,
         NATIVEPHP_USER_HOME_PATH: getPath('home'),
@@ -164,7 +139,8 @@ function getDefaultEnvironmentVariables(secret, apiPort) {
         NATIVEPHP_RECENT_PATH: getPath('recent'),
     };
 }
-function serveApp(secret, apiPort, phpIniSettings) {
+exports.getDefaultEnvironmentVariables = getDefaultEnvironmentVariables;
+function startAppServer(secret, apiPort, phpIniSettings) {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         const appPath = getAppPath();
         console.log('Starting PHP server...', `${state_1.default.php} artisan serve`, appPath, phpIniSettings);
@@ -220,4 +196,4 @@ function serveApp(secret, apiPort, phpIniSettings) {
         });
     }));
 }
-exports.serveApp = serveApp;
+exports.startAppServer = startAppServer;

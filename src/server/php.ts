@@ -119,36 +119,6 @@ function ensureAppFoldersAreAvailable() {
     }
 }
 
-function startQueueWorker(secret, apiPort, phpIniSettings = {}) {
-    const env = {
-        APP_ENV: process.env.NODE_ENV === 'development' ? 'local' : 'production',
-        APP_DEBUG: process.env.NODE_ENV === 'development' ? 'true' : 'false',
-        NATIVEPHP_STORAGE_PATH: storagePath,
-        NATIVEPHP_DATABASE_PATH: databaseFile,
-        NATIVEPHP_API_URL: `http://localhost:${apiPort}/api/`,
-        NATIVEPHP_RUNNING: true,
-        NATIVEPHP_SECRET: secret
-    };
-
-    const phpOptions = {
-        cwd: appPath,
-        env
-    };
-
-    return callPhp(['artisan', 'queue:work'], phpOptions, phpIniSettings);
-}
-
-function startScheduler(secret, apiPort, phpIniSettings = {}) {
-    const env = getDefaultEnvironmentVariables(secret, apiPort);
-
-    const phpOptions = {
-        cwd: appPath,
-        env
-    };
-
-    return callPhp(['artisan', 'schedule:run'], phpOptions, phpIniSettings);
-}
-
 function getPath(name: string) {
   try {
     // @ts-ignore
@@ -165,6 +135,7 @@ function getDefaultEnvironmentVariables(secret, apiPort) {
     NATIVEPHP_STORAGE_PATH: storagePath,
     NATIVEPHP_DATABASE_PATH: databaseFile,
     NATIVEPHP_API_URL: `http://localhost:${apiPort}/api/`,
+    NATIVEPHP_APP_URL: `http://localhost:${state.phpPort}/`,
     NATIVEPHP_RUNNING: true,
     NATIVEPHP_SECRET: secret,
     NATIVEPHP_USER_HOME_PATH: getPath('home'),
@@ -180,7 +151,7 @@ function getDefaultEnvironmentVariables(secret, apiPort) {
   };
 }
 
-function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult> {
+function startAppServer(secret, apiPort, phpIniSettings): Promise<ProcessResult> {
     return new Promise(async (resolve, reject) => {
         const appPath = getAppPath();
 
@@ -255,4 +226,4 @@ function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult> {
     })
 }
 
-export {startQueueWorker, startScheduler, serveApp, getAppPath, retrieveNativePHPConfig, retrievePhpIniSettings}
+export {startAppServer, getAppPath, retrieveNativePHPConfig, retrievePhpIniSettings, getDefaultEnvironmentVariables}

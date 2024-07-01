@@ -1,17 +1,18 @@
-import startWebsockets from "./websockets";
 import startAPIServer, { APIProcess } from "./api";
 import {
   retrieveNativePHPConfig,
   retrievePhpIniSettings,
-  serveApp,
-  startQueueWorker,
-  startScheduler,
+  startAppServer,
 } from "./php";
 import { appendCookie } from "./utils";
 import state from "./state";
 
-export async function startPhpApp() {
-  const result = await serveApp(
+export function startApi(): Promise<APIProcess> {
+    return startAPIServer(state.randomSecret);
+}
+
+export async function startApp() {
+  const result = await startAppServer(
     state.randomSecret,
     state.electronApiPort,
     state.phpIni
@@ -24,24 +25,4 @@ export async function startPhpApp() {
   return result.process;
 }
 
-export function startQueue() {
-  if (!process.env.NATIVE_PHP_SKIP_QUEUE) {
-    return startQueueWorker(
-      state.randomSecret,
-      state.electronApiPort,
-      state.phpIni
-    );
-  } else {
-    return undefined;
-  }
-}
-
-export function runScheduler() {
-  startScheduler(state.randomSecret, state.electronApiPort, state.phpIni);
-}
-
-export function startAPI(): Promise<APIProcess> {
-  return startAPIServer(state.randomSecret);
-}
-
-export { startWebsockets, retrieveNativePHPConfig, retrievePhpIniSettings };
+export { retrieveNativePHPConfig, retrievePhpIniSettings };

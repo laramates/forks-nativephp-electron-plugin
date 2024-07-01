@@ -5,6 +5,7 @@ import middleware from "./api/middleware";
 
 import clipboardRoutes from "./api/clipboard";
 import appRoutes from "./api/app";
+import cacheRoutes from "./api/cache";
 import screenRoutes from "./api/screen";
 import dialogRoutes from "./api/dialog";
 import debugRoutes from "./api/debug";
@@ -16,6 +17,7 @@ import menuRoutes from "./api/menu";
 import menuBarRoutes from "./api/menuBar";
 import windowRoutes from "./api/window";
 import processRoutes from "./api/process";
+import processManagerRoutes from "./api/processManager";
 import contextMenuRoutes from "./api/contextMenu";
 import settingsRoutes from "./api/settings";
 import shellRoutes from "./api/shell";
@@ -38,6 +40,7 @@ async function startAPIServer(randomSecret: string): Promise<APIProcess> {
     httpServer.use(bodyParser.json());
     httpServer.use("/api/clipboard", clipboardRoutes);
     httpServer.use("/api/app", appRoutes);
+    httpServer.use("/api/cache", cacheRoutes);
     httpServer.use("/api/screen", screenRoutes);
     httpServer.use("/api/dialog", dialogRoutes);
     httpServer.use("/api/system", systemRoutes);
@@ -47,6 +50,7 @@ async function startAPIServer(randomSecret: string): Promise<APIProcess> {
     httpServer.use("/api/menu", menuRoutes);
     httpServer.use("/api/window", windowRoutes);
     httpServer.use("/api/process", processRoutes);
+    httpServer.use("/api/process-manager", processManagerRoutes);
     httpServer.use("/api/settings", settingsRoutes);
     httpServer.use("/api/shell", shellRoutes);
     httpServer.use("/api/context", contextMenuRoutes);

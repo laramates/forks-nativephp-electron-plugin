@@ -71,28 +71,37 @@ router.post("/create", (req, res) => {
     });
 
   } else {
+    let preloadPath = join(__dirname, '../../preload/index.js')
+
     state.activeMenuBar = menubar({
       icon: icon || state.icon.replace("icon.png", "IconTemplate.png"),
       index: url,
       showDockIcon,
       showOnAllWorkspaces: false,
       windowPosition: windowPosition ?? "trayCenter",
+      preloadWindow: true,
       browserWindow: {
         width,
         height,
         alwaysOnTop,
         vibrancy,
         backgroundColor,
+        resizable: false,
         transparent: transparency,
         webPreferences: {
-          nodeIntegration: true,
-          sandbox: false,
-          contextIsolation: false
+            backgroundThrottling: false,
+            spellcheck: false,
+            preload: preloadPath,
+            sandbox: false,
+            contextIsolation: false,
+            nodeIntegration: true,
         }
       }
     });
+
     state.activeMenuBar.on("after-create-window", () => {
       require("@electron/remote/main").enable(state.activeMenuBar.window.webContents);
+      state.activeMenuBar.window.webContents.openDevTools();
     });
   }
 

@@ -18,12 +18,8 @@ const utils_1 = require("@electron-toolkit/utils");
 const server_1 = require("./server");
 const utils_2 = require("./server/utils");
 const path_1 = require("path");
-const ps_node_1 = __importDefault(require("ps-node"));
+const processManager_1 = __importDefault(require("./processManager"));
 class NativePHP {
-    constructor() {
-        this.processes = [];
-        this.schedulerInterval = undefined;
-    }
     bootstrap(app, icon, phpBinary, cert) {
         require("@electron/remote/main").initialize();
         state_1.default.icon = icon;
@@ -51,10 +47,7 @@ class NativePHP {
             }
         });
         app.on("before-quit", () => {
-            if (this.schedulerInterval) {
-                clearInterval(this.schedulerInterval);
-            }
-            this.killChildProcesses();
+            processManager_1.default.quit();
         });
         app.on("browser-window-created", (_, window) => {
             utils_1.optimizer.watchWindowShortcuts(window);
@@ -74,12 +67,9 @@ class NativePHP {
             this.setAppUserModelId(config);
             this.setDeepLinkHandler(config);
             this.startAutoUpdater(config);
-            yield this.startElectronApi();
+            yield this.startApi();
             state_1.default.phpIni = yield this.loadPhpIni();
-            yield this.startPhpApp();
-            yield this.startQueueWorker();
-            yield this.startWebsockets();
-            this.startScheduler();
+            yield this.startApp();
             yield (0, utils_2.notifyLaravel)("booted");
         });
     }
@@ -126,9 +116,9 @@ class NativePHP {
             electron_updater_1.autoUpdater.checkForUpdatesAndNotify();
         }
     }
-    startElectronApi() {
+    startApi() {
         return __awaiter(this, void 0, void 0, function* () {
-            const electronApi = yield (0, server_1.startAPI)();
+            const electronApi = yield (0, server_1.startApi)();
             state_1.default.electronApiPort = electronApi.port;
             console.log("Electron API server started on port", electronApi.port);
         });
@@ -146,43 +136,9 @@ class NativePHP {
             return config;
         });
     }
-    startPhpApp() {
+    startApp() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.processes.push(yield (0, server_1.startPhpApp)());
-        });
-    }
-    startQueueWorker() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.processes.push(yield (0, server_1.startQueue)());
-        });
-    }
-    startWebsockets() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.processes.push(yield (0, server_1.startWebsockets)());
-        });
-    }
-    startScheduler() {
-        const now = new Date();
-        const delay = (60 - now.getSeconds()) * 1000 + (1000 - now.getMilliseconds());
-        setTimeout(() => {
-            console.log("Running scheduler...");
-            (0, server_1.runScheduler)();
-            this.schedulerInterval = setInterval(() => {
-                console.log("Running scheduler...");
-                (0, server_1.runScheduler)();
-            }, 60 * 1000);
-        }, delay);
-    }
-    killChildProcesses() {
-        this.processes
-            .filter((p) => p !== undefined)
-            .forEach((process) => {
-            try {
-                ps_node_1.default.kill(process.pid);
-            }
-            catch (err) {
-                console.error(err);
-            }
+            processManager_1.default.adopt(yield (0, server_1.startApp)());
         });
     }
 }

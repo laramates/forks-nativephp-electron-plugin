@@ -9,6 +9,7 @@ const helper_1 = require("./helper");
 const state_1 = __importDefault(require("../state"));
 const menubar_1 = require("menubar");
 const utils_1 = require("../utils");
+const path_1 = require("path");
 const router = express_1.default.Router();
 router.post("/label", (req, res) => {
     res.sendStatus(200);
@@ -47,28 +48,35 @@ router.post("/create", (req, res) => {
         });
     }
     else {
+        let preloadPath = (0, path_1.join)(__dirname, '../../preload/index.js');
         state_1.default.activeMenuBar = (0, menubar_1.menubar)({
             icon: icon || state_1.default.icon.replace("icon.png", "IconTemplate.png"),
             index: url,
             showDockIcon,
             showOnAllWorkspaces: false,
             windowPosition: windowPosition !== null && windowPosition !== void 0 ? windowPosition : "trayCenter",
+            preloadWindow: true,
             browserWindow: {
                 width,
                 height,
                 alwaysOnTop,
                 vibrancy,
                 backgroundColor,
+                resizable: false,
                 transparent: transparency,
                 webPreferences: {
-                    nodeIntegration: true,
+                    backgroundThrottling: false,
+                    spellcheck: false,
+                    preload: preloadPath,
                     sandbox: false,
-                    contextIsolation: false
+                    contextIsolation: false,
+                    nodeIntegration: true,
                 }
             }
         });
         state_1.default.activeMenuBar.on("after-create-window", () => {
             require("@electron/remote/main").enable(state_1.default.activeMenuBar.window.webContents);
+            state_1.default.activeMenuBar.window.webContents.openDevTools();
         });
     }
     state_1.default.activeMenuBar.on("ready", () => {

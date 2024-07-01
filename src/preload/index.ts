@@ -16,6 +16,7 @@ ipcRenderer.on('log', (event, {level, message, context}) => {
 
 // Add Livewire event listeners
 ipcRenderer.on('native-event', (event, data) => {
+    // console.log('native-event from preload', data);
   
   // add support for livewire 3
   // @ts-ignore

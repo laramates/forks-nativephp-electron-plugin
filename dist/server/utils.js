@@ -28,6 +28,7 @@ function appendCookie() {
 }
 exports.appendCookie = appendCookie;
 function notifyLaravel(endpoint, payload = {}) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield axios_1.default.post(`http://127.0.0.1:${state_1.default.phpPort}/_native/api/${endpoint}`, payload, {
@@ -42,6 +43,9 @@ function notifyLaravel(endpoint, payload = {}) {
             Object.values(state_1.default.windows).forEach(window => {
                 window.webContents.send('native-event', payload);
             });
+            if ((_a = state_1.default.activeMenuBar) === null || _a === void 0 ? void 0 : _a.window) {
+                state_1.default.activeMenuBar.window.webContents.send('native-event', payload);
+            }
         }
     });
 }
