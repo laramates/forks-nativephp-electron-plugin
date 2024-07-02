@@ -37,10 +37,14 @@ class ProcessManager {
             console.log(Buffer.from(data).toString('utf8'));
         });
         this.processes.push(proc);
+        console.log(`  Spawned process with ID ${proc.pid}`);
         return proc.pid;
     }
     adopt(process) {
         this.processes.push(process);
+    }
+    kill(pid) {
+        console.log(`Killing process with ID ${pid}`);
     }
     quit() {
         this.processes

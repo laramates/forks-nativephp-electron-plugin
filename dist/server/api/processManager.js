@@ -12,4 +12,8 @@ router.post('/spawn', (req, res) => {
         pid: spawnedProcess,
     });
 });
+router.post('/kill', (req, res) => {
+    processManager_1.default.kill(req.body.pid);
+    res.sendStatus(200);
+});
 exports.default = router;

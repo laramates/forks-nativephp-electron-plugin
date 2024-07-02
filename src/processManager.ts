@@ -36,7 +36,7 @@ class ProcessManager {
             }
         }, options);
 
-        if(command === 'php') {
+        if (command === 'php') {
             command = state.php;
         }
 
@@ -52,6 +52,8 @@ class ProcessManager {
 
         this.processes.push(proc);
 
+        console.log(`  Spawned process with ID ${proc.pid}`);
+
         return proc.pid;
     }
 
@@ -59,6 +61,27 @@ class ProcessManager {
         process
     ) {
         this.processes.push(process);
+    }
+
+    public kill(
+        pid
+    ) {
+        console.log(`Killing process with ID ${pid}`);
+
+        // try {
+        //     ps.kill(pid);
+        // } catch (err) {
+        //     console.error(err);
+        // }
+        //
+        // this.processes = this.processes
+        //     .filter((p) => {
+        //         if (p && p.pid === pid) {
+        //             return false;
+        //         } else {
+        //             return true;
+        //         }
+        //     });
     }
 
     public quit() {
